@@ -1,0 +1,47 @@
+name: CI Workflow
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  push:
+    branches:
+      - main
+
+env:
+  # Configuration parameters for the Buildah task
+  BUILDER_IMAGE: quay.io/buildah/stable:v1.23.3
+  STORAGE_DRIVER: vfs
+  DOCKERFILE: ./Dockerfile
+  TLSVERIFY: "false"
+  FORMAT: "docker"
+  BUILD_EXTRA_ARGS: ""
+  PUSH_EXTRA_ARGS: ""
+  SONAR_SCANNER_IMAGE: sonarqube/scanner-cli:latest
+  K6_IMAGE: loadimpact/k6:latest
+  TRACETEST_IMAGE: your-tracetest-image:latest
+  COSIGN_IMAGE: your-cosign-image:latest
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Buildah
+        run: |
+          # Install Buildah tool
+          sudo apt-get -y install buildah
+
+      - name: Build Image using Buildah
+        env:
+          # Define the image repository and name
+          IMAGE: your-image-repository/your-image-name:latest
+        run: |
+          # Build the image using Buildah
+          buildah --storage-driver=${STORAGE_DRIVER} bud \
+            ${BUILD_EXTRA_ARGS} --format=${FORMAT} \
+            -f ${DOCKERFILE} -t ${IMAGE}
