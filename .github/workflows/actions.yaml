@@ -14,7 +14,6 @@ env:
   STORAGE_DRIVER: vfs
   DOCKERFILE: ./Dockerfile
   TLSVERIFY: "false"
-  FORMAT: "OCI"
   BUILD_EXTRA_ARGS: ""
   PUSH_EXTRA_ARGS: ""
   SONAR_SCANNER_IMAGE: sonarqube/scanner-cli:latest
