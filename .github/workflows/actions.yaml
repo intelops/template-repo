@@ -11,6 +11,7 @@ on:
 
 env:
   BUILDER_IMAGE: quay.io/buildah/stable:v1.23.3
+  REPO: "ghcr.io/intelops/template-repo/alpine"
   STORAGE_DRIVER: vfs
   DOCKERFILE: ./Dockerfile
   TLSVERIFY: "false"
@@ -21,6 +22,7 @@ env:
   K6_IMAGE: loadimpact/k6:latest
   TRACETEST_IMAGE: your-tracetest-image:latest
   COSIGN_IMAGE: your-cosign-image:latest
+  IMAGE: ${REPO}:${{ github.sha }}
 
 jobs:
   build-and-test:
@@ -35,6 +37,13 @@ jobs:
           # Install Buildah tool
           sudo apt-get -y install buildah
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.1.1
+        with:
+          cosign-release: 'v2.1.1'
+      - name: Check install!
+        run: cosign version
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -43,10 +52,24 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Image using Buildah
-        env:
-          IMAGE: ghcr.io/intelops/template-repo/alpine:latest
         run: |
           buildah --storage-driver=${STORAGE_DRIVER} bud \
             ${BUILD_EXTRA_ARGS} --format=${FORMAT} \
             -f ${DOCKERFILE} -t ${IMAGE}
+          buildah push ${IMAGE}
+
+      - name: Scan Image with Trivvy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${IMAGE}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Image using Buildah
+        env:
+          IMAGE: ${REPO}:${{ github.sha }}
+        run: |
           buildah push ${IMAGE}
