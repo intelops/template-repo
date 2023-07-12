@@ -22,7 +22,6 @@ env:
   K6_IMAGE: loadimpact/k6:latest
   TRACETEST_IMAGE: your-tracetest-image:latest
   COSIGN_IMAGE: your-cosign-image:latest
-  IMAGE: ${REPO}:${{ github.sha }}
 
 jobs:
   build-and-test:
@@ -52,6 +51,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Image using Buildah
+        env:
+          IMAGE: ${REPO}:${{ github.sha }}
         run: |
           buildah --storage-driver=${STORAGE_DRIVER} bud \
             ${BUILD_EXTRA_ARGS} --format=${FORMAT} \
@@ -59,6 +60,8 @@ jobs:
           buildah push ${IMAGE}
 
       - name: Scan Image with Trivvy
+        env:
+          IMAGE: ${REPO}:${{ github.sha }}
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${IMAGE}
