@@ -25,9 +25,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Docker Lint
-        uses: luke142367/Docker-Lint-Action@v1.0.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
-          target: Dockerfile
+          dockerfile: Dockerfile
 
       - name: Docker Build using Buildah
         id: build_image
