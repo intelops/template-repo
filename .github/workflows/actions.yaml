@@ -20,11 +20,15 @@ env:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-     
+
+      - name: Docker Lint
+        uses: luke142367/Docker-Lint-Action@v1.0.0
+        with:
+          target: Dockerfile
+
       - name: Docker Build using Buildah
         id: build_image
         uses: redhat-actions/buildah-build@v2
