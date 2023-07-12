@@ -11,7 +11,7 @@ on:
 
 env:
   BUILDER_IMAGE: quay.io/buildah/stable:v1.23.3
-  REPO: "ghcr.io/intelops/template-repo/alpine"
+  REPO: ghcr.io/intelops/template-repo/alpine
   STORAGE_DRIVER: vfs
   DOCKERFILE: ./Dockerfile
   TLSVERIFY: "false"
@@ -51,20 +51,17 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Image using Buildah
-        env:
-          IMAGE: ${REPO}:${{ github.sha }}
         run: |
           buildah --storage-driver=${STORAGE_DRIVER} bud \
             ${BUILD_EXTRA_ARGS} --format=${FORMAT} \
-            -f ${DOCKERFILE} -t ${IMAGE}
-          buildah push ${IMAGE}
+            -f ${DOCKERFILE} -t ${REPO}:${{ .github.sha }}
 
       - name: Scan Image with Trivvy
         env:
           IMAGE: ${REPO}:${{ github.sha }}
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${IMAGE}
+          image-ref: ${REPO}:${{ github.sha }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -72,7 +69,5 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Push Image using Buildah
-        env:
-          IMAGE: ${REPO}:${{ github.sha }}
         run: |
-          buildah push ${IMAGE}
+          buildah push ${REPO}:${{ github.sha }}
