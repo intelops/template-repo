@@ -24,6 +24,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: set up podman
+        run : |
+          sudo apt update
+          sudo apt-get -y install podman
+          systemctl --user enable --now podman.socket
+
       - name: Docker Lint
         uses: hadolint/hadolint-action@v3.1.0
         with:
