@@ -54,11 +54,9 @@ jobs:
         run: |
           buildah --storage-driver=${STORAGE_DRIVER} bud \
             ${BUILD_EXTRA_ARGS} --format=${FORMAT} \
-            -f ${DOCKERFILE} -t ${REPO}:${{ .github.sha }}
+            -f ${DOCKERFILE} -t ${REPO}:${{ github.sha }}
 
       - name: Scan Image with Trivvy
-        env:
-          IMAGE: ${REPO}:${{ github.sha }}
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${REPO}:${{ github.sha }}
