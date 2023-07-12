@@ -66,4 +66,4 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
         run: |
-          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ steps.build_image.outputs.image-with-tag }}
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_REGISTRY }}/${{ steps.build_image.outputs.image }}:${{ steps.build_image.outputs.tags }}
