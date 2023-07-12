@@ -46,9 +46,9 @@ jobs:
 #        with:
 #          cosign-release: 'v2.1.1'
 
-      - name: Check install!
-        run: cosign version
-
+#      - name: Check install!
+#        run: cosign version
+#
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
