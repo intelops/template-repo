@@ -31,6 +31,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Set Image Tag
+        run:
+          GIT_SHA=${{ github.sha }}
+          export IMAGE=${IMAGE}:${GIT_SHA}
+
       - name: Set up Buildah
         run: |
           # Install Buildah tool
@@ -40,6 +45,7 @@ jobs:
         uses: sigstore/cosign-installer@v3.1.1
         with:
           cosign-release: 'v2.1.1'
+
       - name: Check install!
         run: cosign version
 
@@ -54,18 +60,17 @@ jobs:
         run: |
           buildah --storage-driver=${STORAGE_DRIVER} bud \
             ${BUILD_EXTRA_ARGS} --format=${FORMAT} \
-            -f ${DOCKERFILE} -t ${REPO}:${{ github.sha }}
-
+            -f ${DOCKERFILE} -t ${IMAGE}
       - name: Scan Image with Trivvy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${REPO}:${{ github.sha }}
+          image-ref: ${IMAGE}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      - name: Push Image using Buildah
-        run: |
-          buildah push ${REPO}:${{ github.sha }}
+#      - name: Push Image using Buildah
+#        run: |
+#          buildah push ${REPO}:${{ github.sha }}
