@@ -38,16 +38,6 @@ jobs:
           containerfiles: |
             ./Dockerfile
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
       - name: Push To Github
         uses: ./
         id: push
@@ -59,6 +49,16 @@ jobs:
           password: ${{ env.REGISTRY_PASSWORD }}
           extra-args: |
             --disable-content-trust
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.1.1
