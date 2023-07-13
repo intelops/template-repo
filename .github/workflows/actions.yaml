@@ -14,7 +14,6 @@ env:
   IMAGE_NAME: alpine
   IMAGE_TAGS: ${{ github.sha }}
   DOCKERFILE: Dockerfile
-  DOCKER_CONTEXT: .
   IMAGE_REGISTRY: ghcr.io
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +43,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v4
         with:
-          context: ${{ env.DOCKER_CONTEXT }}
+          context: .
           file: ${{ env.DOCKERFILE }}
           platforms: linux/amd64
           load: true
