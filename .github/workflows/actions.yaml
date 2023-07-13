@@ -12,7 +12,7 @@ on:
 
 env:
   IMAGE_NAME: alpine
-  IMAGE_TAGS: ${{ github.sha }}
+  IMAGE_TAGS: ${{ github.sha | slice(0, 7) }}
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -42,9 +42,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: false
-          load: true
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
       
 #      - name: Run Trivy vulnerability scanner
