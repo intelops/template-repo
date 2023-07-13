@@ -13,7 +13,9 @@ on:
 env:
   IMAGE_NAME: alpine
   IMAGE_TAGS: ${{ github.sha }}
-  IMAGE_REGISTRY: ghcr.io/${{ github.repository }}
+  DOCKERFILE: Dockerfile
+  DOCKER_CONTEXT: .
+  IMAGE_REGISTRY: ghcr.io
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
   DEBUG: false
@@ -34,28 +36,33 @@ jobs:
       - name: Login to GHCR
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
 
       - name: Build
+        id: docker_build
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./Dockerfile
+          context: ${{ env.DOCKER_CONTEXT }}
+          file: ${{ env.DOCKERFILE }}
           platforms: linux/amd64
           load: true
           push: false
-          tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          tags: |
+            ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+            ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
 
       - name: check Image
+        id: check_image
         run: docker image ls 
         if: ${{ env.DEBUG == 'true' }}
 
       - name: Run Trivy vulnerability scanner
+        id: scan_image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -63,5 +70,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Push Image
+        id: push_image
         run: |
-          docker push ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          docker push ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          docker push ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
