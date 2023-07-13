@@ -43,6 +43,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: false
+          load: true
           tags: ${{ env.IMAGE_REGISTRY }}:${{ env.IMAGE_TAGS }}
       
       - name: Run Trivy vulnerability scanner
