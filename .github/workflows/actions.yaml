@@ -12,7 +12,7 @@ on:
 
 env:
   IMAGE_NAME: alpine
-  IMAGE_TAGS: ${{ github.sha | slice(0, 7) }}
+  IMAGE_TAGS: ${{ github.sha }}
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
