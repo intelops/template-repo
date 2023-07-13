@@ -43,12 +43,13 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
+          load: true
           push: false
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
       - name: check Image
         run: |
           docker image ls 
-          
+
 #      - name: Run Trivy vulnerability scanner
 #        uses: aquasecurity/trivy-action@master
 #        with:
