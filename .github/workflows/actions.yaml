@@ -16,6 +16,7 @@ env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASSWORD: ${{ github.token }}
+  DOCKER_HOST: 'unix:///var/run/podman/podman.sock"
 
 jobs:
   build-and-test:
@@ -26,8 +27,6 @@ jobs:
 
       - name: set up podman
         run : |
-          sudo apt update
-          sudo apt-get -y install podman
           systemctl --user enable --now podman.socket
 
       - name: Docker Lint
