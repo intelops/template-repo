@@ -32,7 +32,7 @@ jobs:
       - name: Set Environment Variables
         run: |
           echo "GIT_SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "IMAGE_TAGS=${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${GIT_SHORT_SHA}" >> $GITHUB_ENV
+          echo "IMAGE_TAGS=${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
   
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
