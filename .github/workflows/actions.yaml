@@ -73,7 +73,7 @@ jobs:
         id: scan_image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${IMAGE_TAGS}
+          image-ref: ${{ env.IMAGE_TAGS }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -83,7 +83,7 @@ jobs:
       - name: Push Image
         id: push_image
         run: |
-          docker push ${IMAGE_TAGS}
+          docker push ${{ env.IMAGE_TAGS }}
 
       - name: docker metadata
         id: docker_meta
@@ -99,6 +99,6 @@ jobs:
         run: |
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
         env:
-          TAGS: ${IMAGE_TAGS}
+          TAGS: ${{ env.IMAGE_TAGS }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           DIGEST: ${{ steps.docker_build.outputs.digest }}
