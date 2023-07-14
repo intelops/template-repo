@@ -62,7 +62,7 @@ jobs:
           platforms: linux/amd64
           load: true
           push: false
-          tags: ${IMAGE_TAGS}
+          tags: ${{ env.IMAGE_TAGS }}
 
       - name: check Image
         id: check_image
