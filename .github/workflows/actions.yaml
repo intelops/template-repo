@@ -12,7 +12,6 @@ on:
 
 env:
   IMAGE_NAME: alpine
-  IMAGE_TAGS: ${{ github.sha }}
   DOCKERFILE: Dockerfile
   IMAGE_REGISTRY: ghcr.io
   REGISTRY_USER: ${{ github.actor }}
@@ -30,6 +29,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set Environment Variables
+        run: |
+          echo "GIT_SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE_TAGS=${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+  
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -58,9 +62,8 @@ jobs:
           platforms: linux/amd64
           load: true
           push: false
-          tags: |
-            ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
-            ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.IMAGE_TAGS }}
+
       - name: check Image
         id: check_image
         run: docker image ls 
@@ -70,7 +73,7 @@ jobs:
         id: scan_image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          image-ref: ${{ env.IMAGE_TAGS }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -80,8 +83,7 @@ jobs:
       - name: Push Image
         id: push_image
         run: |
-          docker push ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
-          docker push ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_TAGS }}
 
       - name: docker metadata
         id: docker_meta
@@ -97,6 +99,6 @@ jobs:
         run: |
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
         env:
-          TAGS:  ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
+          TAGS: ${{ env.IMAGE_TAGS }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           DIGEST: ${{ steps.docker_build.outputs.digest }}
