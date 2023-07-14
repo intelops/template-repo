@@ -22,6 +22,10 @@ env:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -31,6 +35,11 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ env.DOCKERFILE }}
 
       - name: Login to GHCR
         uses: docker/login-action@v2
@@ -51,7 +60,6 @@ jobs:
           tags: |
             ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
             ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
-
       - name: check Image
         id: check_image
         run: docker image ls 
@@ -73,3 +81,18 @@ jobs:
         run: |
           docker push ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAGS }}
           docker push ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+#      - name: docker metadata
+#        id: docker_meta
+#        uses: docker/metadata-action@v4.4.0
+#        with:
+#          images: ghcr.io/sigstore/sample-honk
+#          tags: type=sha,format=long
+#
+#      - name: Sign image with a key
+#        run: |
+#          cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
+#        env:
+#          TAGS: ${{ steps.docker_meta.outputs.tags }}
+#          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+#          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+#          DIGEST: ${{ steps.build-and-push.outputs.digest }}
