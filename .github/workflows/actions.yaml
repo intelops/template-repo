@@ -90,10 +90,13 @@ jobs:
           images: ghcr.io/sigstore/sample-honk
           tags: type=sha,format=long
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.1.1
+
       - name: Sign image with a key
         run: |
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
         env:
-          TAGS: ${{ steps.docker_meta.outputs.tags }}
+          TAGS: ${{ env.IMAGE_TAGS }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           DIGEST: ${{ steps.docker_build.outputs.digest }}
