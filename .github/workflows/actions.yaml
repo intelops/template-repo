@@ -29,6 +29,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Verify Signed Commits
+        run: |
+          git log --format="%G?" $(git rev-parse HEAD~..HEAD) | grep -vq "G" && {
+            echo "Not all commits are signed. Please sign all commits before pushing."
+            exit 1
+          }
+
       - name: Set Environment Variables
         run: |
           echo "GIT_SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
