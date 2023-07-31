@@ -1,4 +1,9 @@
-FROM alpine:3.18.2
-RUN apk add --update --no-cache bash=5.2.15-r5 && \
-    rm -rf /var/cache/apk/*
-ENTRYPOINT ["bash"]
+FROM python:3.7
+
+RUN mkdir /app
+WORKDIR /app
+COPY . /app/
+RUN pip install -r requirements.txt
+
+EXPOSE 5000
+CMD ["python", "/app/main.py"]

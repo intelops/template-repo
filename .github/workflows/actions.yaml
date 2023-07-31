@@ -29,6 +29,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: SonarQube Scan
+        uses: kitabisa/sonarqube-action@v1.2.0
+        with:
+          host: ${{ secrets.SONARQUBE_HOST }}
+          login: ${{ secrets.SONARQUBE_TOKEN }}
+	  projectBaseDir: "app/"
+
       - name: Set Environment Variables
         run: |
           echo "GIT_SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
